@@ -25,7 +25,3 @@ No build step and no server code. To view it locally, open `index.html`, or run 
 Official competition files: ESPN play-by-play, schedule and team files for NCAA women's basketball, from the SportsDataverse wehoop package, season 2025-26. The full calculation methods (shot filters, definitions, ranks, margin of error and checks) are in the "Calculation methods" section at the bottom of the page.
 
 The figures describe patterns. They do not show what caused them.
-
-## Credits
-
-Made with AI help (Claude, Codex). The arena picture was made with an AI image tool and is not a real arena. The Purdue logo comes from the supplied teams file; usage rights are to be confirmed before any submission. Light rays: Paper Shaders (Apache-2.0). Gold dust: tsParticles (MIT). Licenses are in `js/vendor/`.
