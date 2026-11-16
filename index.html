@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Shoot Like a Boiler: Purdue women's basketball, 2025-26</title>
+<meta name="description" content="How Purdue women's basketball compared with the other 360 teams in 2025-26: points per shot at the rim, on threes and overall, plus home crowd size.">
+<link rel="icon" href="img/purdue.png">
+<link rel="preload" href="img/hero.webp" as="image" fetchpriority="high">
+<link rel="preload" href="data/purdue-2025-26.json" as="fetch" crossorigin>
+<link rel="preload" href="js/vendor/tsparticles-dust.js" as="script">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="fan" viewBox="0 0 20 28">
+    <circle cx="10" cy="6" r="5" fill="currentColor"/>
+    <path d="M1 27v-8a9 9 0 0 1 18 0v8z" fill="currentColor"/>
+  </symbol>
+</svg>
+
+<div class="hero-band pre" id="heroBand">
+  <div class="hero-stage" id="heroStage" aria-hidden="true">
+    <div class="hero-scene" id="heroScene">
+      <img class="hero-photo" id="heroPhoto" src="img/hero.webp" alt="" width="1536" height="1024" fetchpriority="high" decoding="async">
+      <div class="hero-rays" id="heroRays"></div>
+      <div class="hero-shade"></div>
+      <div class="hero-dust" id="heroDust"></div>
+    </div>
+  </div>
+  <header class="hero">
+    <p class="kicker"><img class="p-logo" src="img/purdue.png" alt="" width="34" height="34"><span>Purdue women's basketball · <span class="nw" data-bind="season_text">2025-26</span></span></p>
+    <h1><span class="h1-b" data-text="Shoot">Shoot</span> <span class="h1-a">like a Boiler</span></h1>
+    <p class="lede">Close to the basket, Purdue stood out: <b data-bind="rim_top">top 11%</b> at the rim and <b data-bind="layup_top">top 16%</b> on layups, among <span data-bind="n_teams">361</span> teams.</p>
+  </header>
+</div>
+
+<main>
+<noscript><p class="noscript">This page draws its figures and numbers with JavaScript from <a href="data/purdue-2025-26.json">data/purdue-2025-26.json</a>.</p></noscript>
+<p class="loading" id="loading" role="status">Loading data…</p>
+
+<section class="fig" id="fig1" aria-labelledby="h1">
+  <header class="fig-head">
+    <span class="fig-num" aria-hidden="true">01</span>
+    <div>
+      <h2 id="h1">Close shots score the most, then threes</h2>
+      <p class="take">Each spot shows the average points a shot from there scored, for other teams. A miss counts <span class="num">0</span>, a made two <span class="num">2</span>, a made three <span class="num">3</span>. Brighter means more. Pick a shot type below to see Purdue's edge.</p>
+    </div>
+  </header>
+  <div class="court-wrap">
+    <div class="chart" id="court" role="img"></div>
+    <div class="legend-row" aria-hidden="true">
+      <span>Points per shot</span>
+      <span class="ramp-wrap"><span class="ramp" id="ramp"></span><span class="ramp-ticks" id="rampTicks"></span></span>
+    </div>
+  </div>
+  <p class="zone-hint" id="zoneHint" aria-live="polite"></p>
+  <div class="zones" id="zones" role="group" aria-label="Show one shot type on the court"></div>
+</section>
+
+<section class="fig" id="fig2" aria-labelledby="h2">
+  <header class="fig-head">
+    <span class="fig-num" aria-hidden="true">02</span>
+    <div>
+      <h2 id="h2">Purdue ranked above most teams per shot</h2>
+      <p class="take">Each dot is one team. Farther right means more points per shot.</p>
+    </div>
+  </header>
+  <div class="strips" id="strips" role="img"></div>
+  <p class="foot">Rank <span class="num">1</span> is the most points per shot. Hover or tap a dot to see the team.</p>
+</section>
+
+<section class="fig" id="fig3" aria-labelledby="h3">
+  <header class="fig-head">
+    <span class="fig-num" aria-hidden="true">03</span>
+    <div>
+      <h2 id="h3">Purdue made more of its shots</h2>
+      <p class="take">The bars show how many of every <span class="num">100</span> shots went in. Purdue was ahead at the rim, on threes and in between.</p>
+    </div>
+    <p class="fig-rank" id="rank3"></p>
+  </header>
+  <div class="split" id="split" role="img"></div>
+</section>
+
+<section class="fig" id="fig4" aria-labelledby="h4">
+  <header class="fig-head">
+    <span class="fig-num" aria-hidden="true">04</span>
+    <div>
+      <h2 id="h4">Purdue drew one of the biggest home crowds</h2>
+      <p class="take">About <b data-bind="crowd_r"></b> fans came to a typical Purdue home game. A typical team drew about <b data-bind="typ_r"></b>.</p>
+    </div>
+    <p class="fig-rank" id="rank4"></p>
+  </header>
+  <div class="crowd" id="crowd" role="img"></div>
+</section>
+
+<details class="notes" id="notes">
+  <summary>Calculation methods</summary>
+  <div class="notes-body">
+    <ul>
+      <li><b>Source.</b> The official competition files: ESPN play-by-play, schedule and team files for NCAA women's basketball, from the SportsDataverse wehoop package. Season <span data-bind="season_text"></span>, the only season in the files with a floor location on every shot: <span data-bind="fga_events"></span> field-goal attempts in <span data-bind="pbp_games"></span> games with play-by-play. Totals cover the games in these files, which may not be every NCAA game.</li>
+      <li><b>Shot filter.</b> One shot is one field-goal attempt (FGA), made or missed. Free throws are excluded. Removed: <span data-bind="drop_team"></span> attempts credited to a team not in the game, <span data-bind="drop_two"></span> two-pointers located more than 24 feet from the hoop, <span data-bind="drop_three"></span> three-pointers located less than 21 feet from it, and <span data-bind="unlisted_shots"></span> attempts by <span data-bind="unlisted_teams"></span> teams outside the <span data-bind="n_teams"></span>-team list. Kept: <span data-bind="shots_all"></span> FGA, <span data-bind="purdue_shots"></span> of them by Purdue in <span data-bind="purdue_games"></span> games.</li>
+      <li><b>Distance and shot type.</b> Distance d = √((x − 25)² + y²) feet, where x runs 0 to 50 across the floor and y is feet from the hoop along the court. At the rim: two-point attempts with d under <span data-bind="rim_feet"></span> feet. In between: all other two-point attempts (mid-range and floaters). Threes: three-point attempts as the source labels them. Layups: two-point attempts with play type LayUpShot (dunks and tip shots are separate types; <span data-bind="layup_odd"></span> LayUpShot scored as a three is excluded).</li>
+      <li><b>Points per shot.</b> PPS = (2 × made twos + 3 × made threes) ÷ FGA, which equals 2 × eFG%. Every rate is a ratio of season totals (total points ÷ total FGA), not an average of game or team rates. The shot chart groups shots by whole-foot floor location and shows spots with at least <span data-bind="min_cell"></span> FGA; brightness is PPS at that spot.</li>
+      <li><b>Other teams.</b> The comparison pools the other <span data-bind="others_n"></span> teams: all-team totals minus Purdue's, per shot type and per floor spot (<span data-bind="others_shots"></span> FGA). Other teams <span data-bind="others_pps"></span> PPS; Purdue <span data-bind="purdue_pps"></span>, or <span data-bind="pct_more"></span> more.</li>
+      <li><b>Ranks.</b> Rank = 1 + the number of teams with a strictly higher value, computed from exact counts, so ties share the better rank. Top share = rank ÷ <span data-bind="n_teams"></span>, rounded up to a whole percent. Purdue: <span data-bind="rim_rank"></span> at the rim, <span data-bind="three_rank"></span> on threes, <span data-bind="mid_rank"></span> in between, <span data-bind="all_rank"></span> on all shots. Layup FG%: Purdue <span data-bind="layup_pu"></span>, <span data-bind="layup_rank"></span>; other teams <span data-bind="layup_oth"></span>. Big Ten (<span data-bind="b10_of"></span> teams): <span data-bind="rim_b10"></span> at the rim, <span data-bind="three_b10"></span> on threes, <span data-bind="all_b10"></span> on all shots. "Typical team" is the median team.</li>
+      <li><b>Margin of error.</b> Standard error of Purdue's PPS = standard deviation of points per attempt (0, 2 or 3) ÷ √FGA. Two standard errors: ±<span data-bind="rim_moe"></span> at the rim, ±<span data-bind="three_moe"></span> on threes, ±<span data-bind="all_moe"></span> on all shots. Moving Purdue's value by that much and re-ranking it against the other 360 teams (held fixed) gives: rim <span data-bind="rim_range"></span>, threes <span data-bind="three_range"></span>, all shots <span data-bind="all_range"></span>. This is a sensitivity range for luck in Purdue's own shots, not a confidence interval for the rank.</li>
+      <li><b>Shot mix and shot making.</b> With s = share of FGA by shot type and p = PPS by shot type, Purdue's gap to other teams splits exactly into two parts. Shot mix = Σ (s<sub>Purdue</sub> − s<sub>other</sub>) × p<sub>other</sub> = <span data-bind="mix"></span>. Shot making = Σ s<sub>Purdue</sub> × (p<sub>Purdue</sub> − p<sub>other</sub>) = <span data-bind="making"></span>. Total <span data-bind="gap"></span> PPS. Purdue's shot making ranks <span data-bind="making_rank"></span> (same split, each team against all teams pooled). Points a game: shot making × Purdue's <span data-bind="shots_pg"></span> FGA a game ≈ <span data-bind="per_game"></span>, field goals only; an accounting comparison, not a forecast. The made-shot bars are FGM per 100 FGA of each type.</li>
+      <li><b>Home crowd.</b> Median recorded attendance at completed, non-neutral home games with attendance above zero, for teams with at least <span data-bind="crowd_min"></span> such games (<span data-bind="crowd_of"></span> teams). Purdue: <span data-bind="crowd_games"></span> of <span data-bind="crowd_home"></span> home games, median <span data-bind="crowd_median"></span>, <span data-bind="crowd_rank"></span>. Typical team: the median of the team medians (<span data-bind="crowd_typical"></span>). Attendance is as the source recorded it.</li>
+      <li><b>Checks.</b> An independent recount from the raw files matches every rank. Purdue's all-shot rank under other choices: <span data-bind="chk_rim4"></span> with a <span data-bind="rim_lo"></span>-foot rim cutoff, <span data-bind="chk_rim6"></span> with <span data-bind="rim_hi"></span> feet, <span data-bind="chk_reg"></span> in the regular season only, and <span data-bind="chk_box"></span> counting only team-games that also appear in the box scores.</li>
+      <li><b>Limits.</b> Field-goal shooting only: free throws, turnovers and rebounds are not measured, and nothing is adjusted for opponent strength. These are associations; they do not show why Purdue went <span data-bind="record"></span>.</li>
+      <li><b>Data file.</b> Every number on this page is read from <a href="data/purdue-2025-26.json">data/purdue-2025-26.json</a>, computed with Python and DuckDB from the competition files.</li>
+    </ul>
+  </div>
+</details>
+</main>
+
+<footer class="page-foot">
+  <p>Draft figures for the Boiler Up, Hammer Data Challenge. Data: official competition dataset, <span class="nw" data-bind="season_text"></span>. Built <span data-bind="generated"></span>.</p>
+  <a class="gh" href="https://github.com/M-Habashi/shoot-like-a-boiler-purdue" aria-label="Code on GitHub" title="Code on GitHub"><svg viewBox="0 0 16 16" width="24" height="24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg></a>
+</footer>
+
+<div id="tip" class="tip" role="tooltip" hidden></div>
+<script src="js/app.js" defer></script>
+</body>
+</html>
