@@ -140,7 +140,7 @@ svg text { font-family: var(--body); fill: var(--ink-2); }
 .ramp-ticks span:first-child { transform: none; }
 /* zone cards: tap to show one shot type on the court, tap again to show all */
 /* one fixed line, so picking a card never moves the cards */
-.zone-hint { height: 24px; line-height: 24px; max-width: 760px; margin: 16px auto 8px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 14px; color: var(--ink-2); text-align: center; }
+.zone-hint { height: 24px; line-height: 24px; max-width: 760px; margin: 16px auto 8px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: clamp(12px, 3.4vw, 14px); color: var(--ink-2); text-align: center; }
 .zones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; max-width: 760px; margin: 0 auto; }
 .zone {
   position: relative; display: grid; gap: 8px; align-items: center; text-align: left; padding: 11px 14px; cursor: pointer;
@@ -242,16 +242,19 @@ svg text { font-family: var(--body); fill: var(--ink-2); }
 .tip span { color: var(--ink-2); }
 .tip em { font-style: normal; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
 
-/* notes: a plain disclosure under a rule */
-.notes { margin-top: 56px; border-top: 1px solid var(--line-2); }
-.notes summary { cursor: pointer; padding: 18px 0; font-weight: 600; color: var(--gold); list-style: none; display: flex; align-items: center; gap: 10px; }
+/* notes: compact two-column disclosure under a rule */
+.notes { margin-top: 48px; border-top: 1px solid var(--line-2); }
+.notes summary { cursor: pointer; padding: 14px 0; font: 600 14px/1.2 var(--body); letter-spacing: .04em; text-transform: uppercase; color: var(--gold); list-style: none; display: flex; align-items: center; gap: 10px; }
 .notes summary::-webkit-details-marker { display: none; }
-.notes summary::before { content: ""; width: 8px; height: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-45deg); transition: transform .2s; }
+.notes summary::before { content: ""; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-45deg); transition: transform .2s; }
 .notes[open] summary::before { transform: rotate(45deg); }
-.notes-body { padding: 0 0 8px; font-size: 14.5px; color: var(--ink-2); }
-.notes-body b { color: var(--ink); }
-.notes ul { margin: 0; padding-left: 20px; }
-.notes li { margin: 6px 0; max-width: 90ch; }
+.notes-body { padding: 2px 0 18px; }
+.method-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 28px; margin: 0; font-size: 13px; line-height: 1.48; color: var(--ink-2); }
+.method-grid > div { padding-top: 10px; border-top: 1px solid var(--line); }
+.method-grid dt { margin: 0 0 3px; font: 700 11.5px/1.2 var(--body); letter-spacing: .07em; text-transform: uppercase; color: var(--ink); }
+.method-grid dd { margin: 0; }
+.method-grid a { color: var(--gold); text-underline-offset: 2px; }
+@media (max-width: 680px) { .method-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; } }
 .page-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 26px 0 40px;
   border-top: 1px solid var(--line); font-size: 13px; color: var(--ink-3); }
 .page-foot p { margin: 0; }

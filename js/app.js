@@ -119,7 +119,11 @@
       shots_pg: Math.round(D.purdue_shots / D.purdue_games), mix_r: signed(S.mix), making_r: signed(S.making),
       gap_u: S.gap.toFixed(3), making_u: S.making.toFixed(3),
       mix_dir: `${Math.abs(S.mix).toFixed(3)} ${S.mix < 0 ? 'below' : 'above'}`,
-      rim_top: `top ${R.rim.top_pct}%`, layup_top: `top ${D.layups.top_pct}%`,
+      rim_top: `top ${R.rim.top_pct}%`, rim_top_pct: R.rim.top_pct, layup_top: `top ${D.layups.top_pct}%`, crowd_top: `top ${C.top_pct}%`,
+      rim_rank_only: ordinal(R.rim.rank), three_rank_only: ordinal(R.three.rank), all_rank_only: ordinal(R.all.rank),
+      rim_diff100: Math.round(D.zones.rim.purdue_made * 100) - Math.round(O.zones.rim.made * 100),
+      three_diff100: Math.round(D.zones.three.purdue_made * 100) - Math.round(O.zones.three.made * 100),
+      mid_diff100: Math.round(D.zones.mid.purdue_made * 100) - Math.round(O.zones.mid.made * 100),
       rim_rank: `${ordinal(R.rim.rank)} of ${R.rim.of}`, layup_rank: `${ordinal(D.layups.rank)} of ${D.layups.of}`,
       layup_pu: `${D.layups.purdue.made} of ${D.layups.purdue.shots} (${Math.round(D.layups.purdue.pct)}%)`, layup_oth: `${Math.round(D.layups.others.pct)}%`,
       pct_more: `${O.purdue_pct_more.toFixed(1)}%`, others_pps: f2(O.pps), others_n: O.teams,
@@ -128,6 +132,8 @@
       shots_all: fmt(D.shots_all), purdue_shots: fmt(D.purdue_shots), purdue_games: D.purdue_games, rim_feet: D.rim_feet,
       min_cell: O.map.min_shots_drawn,
       rim_b10: `${ordinal(R.rim.big_ten_rank)} of ${R.rim.big_ten_of}`, three_b10: `${ordinal(R.three.big_ten_rank)} of ${R.three.big_ten_of}`,
+      rim_b10_n: ordinal(R.rim.big_ten_rank), three_b10_n: ordinal(R.three.big_ten_rank), all_b10_n: ordinal(R.all.big_ten_rank),
+      chk_rim_both: M.rank_all_rim_4ft === M.rank_all_rim_6ft ? ordinal(M.rank_all_rim_4ft) : `${ordinal(M.rank_all_rim_4ft)}/${ordinal(M.rank_all_rim_6ft)}`,
       all_b10: `${ordinal(R.all.big_ten_rank)} of ${R.all.big_ten_of}`, mid_rank: `${ordinal(R.mid.rank)} of ${R.mid.of}`,
       rim_moe: f2(R.rim.pm_2se), three_moe: f2(R.three.pm_2se),
       rim_range: `${ordinal(R.rim.rank_range_2se[0])} to ${ordinal(R.rim.rank_range_2se[1])}`,
@@ -138,6 +144,7 @@
       crowd_games: C.games_counted, crowd_home: C.home_games, crowd_min: C.min_games, crowd_of: C.of,
       // Calculation methods (D.method comes from analysis/fable-v2_page_method.py)
       fga_events: fmt(M.fga_events), pbp_games: fmt(M.pbp_games), drop_team: M.drop_team_not_in_game, drop_two: M.drop_two_beyond_24ft,
+      drop_bad: fmt(M.drop_team_not_in_game + M.drop_two_beyond_24ft + M.drop_three_inside_21ft),
       drop_three: M.drop_three_inside_21ft, unlisted_shots: fmt(M.unlisted_shots), unlisted_teams: M.unlisted_teams,
       others_shots: fmt(O.shots), layup_odd: D.layups.left_out_three_point_layup_labels.shots,
       three_rank: `${ordinal(R.three.rank)} of ${R.three.of}`, all_moe: f2(R.all.pm_2se), b10_of: R.all.big_ten_of,
@@ -147,7 +154,7 @@
     };
     document.querySelectorAll('[data-bind]').forEach(n => {
       const k = n.dataset.bind;
-      if (!(k in values)) throw new Error('No value for ' + k);
+      if (!(k in values)) { console.warn('No value for ' + k); return; }
       n.textContent = values[k];
     });
   }
@@ -247,7 +254,7 @@
     el('path', { class: 'court-line', d }, svg);
     el('circle', { class: 'hoop', cx: X(25), cy: Y(0), r: Math.max(2.2, 0.75 * s) }, svg);
     // Purdue's edge in the picked zone: a label inside that zone (the rim's sits to the side, with a line to the hoop)
-    const edge = el('g', { class: 'edge' }, svg), small = W < 520, ew = small ? 132 : 156, eh = small ? 42 : 48;
+    const edge = el('g', { class: 'edge' }, svg), small = W < 520, ew = small ? 156 : 186, eh = small ? 42 : 48;
     courtReveal.showEdge = z => {
       edge.textContent = '';
       if (!z) return;
@@ -262,7 +269,7 @@
       const n = el('text', { class: 'edge-n', x: cx, y: cy + (small ? -2 : -3), 'text-anchor': 'middle' }, g, '+' + gap.toFixed(2));
       const sub = el('text', { class: 'edge-sub', x: cx, y: cy + (small ? 13 : 15), 'text-anchor': 'middle' }, g, 'Purdue ');
       el('tspan', { class: 'num edge-pu' }, sub, f2(pu));
-      sub.appendChild(document.createTextNode(' · Others '));
+      sub.appendChild(document.createTextNode(' · Other teams '));
       el('tspan', { class: 'num' }, sub, f2(ot));
       if (REDUCED) return;
       const t0 = performance.now(), count = now => {              // the edge counts up from +0.00 while the card pops in
@@ -308,7 +315,7 @@
   /* Zone toggles: a tap or click picks one shot type (gold on the court, with Purdue's edge); the same tap again shows all,
      as does Escape. Click only (no hover or focus effects), so a phone tap behaves exactly like a mouse click.
      Only styles change on a pick: nothing around the cards changes size, so the cards never move. */
-  const HINT_ALL = 'Tap a shot type to compare.', HINT_ONE = 'Tap it again to show all.';   // short: one line even at 320 px
+  const HINT_ALL = 'Select a zone to see how Purdue compared.', HINT_ONE = 'Select again to show all zones.';
   let zoneSel = null;
   function setZone(z) {
     const prev = zoneSel;
@@ -465,8 +472,8 @@
     el('line', { class: 'zero', x1: X(0), x2: X(0), y1: top - 2, y2: H - 20 }, svg);
     const sum = document.createElement('p');
     sum.className = 'split-sum';
-    sum.innerHTML = `<img src="${LOGO}" alt=""><span>Purdue shot from about the same spots as other teams and made more of those shots. ` +
-      `That was worth about <b>${(S.making * D.purdue_shots / D.purdue_games).toFixed(1)} points a game</b>.</span>`;
+    sum.innerHTML = `<img src="${LOGO}" alt=""><span>Purdue took shots from nearly the same mix of spots as other teams, so almost all of its shooting advantage came from conversion: ` +
+      `worth about <b>${(S.making * D.purdue_shots / D.purdue_games).toFixed(1)} field-goal points a game</b>.</span>`;
     host.appendChild(sum);
   }
 
@@ -494,7 +501,7 @@
     });
     const key = document.createElement('p');
     key.className = 'foot';
-    key.innerHTML = `Each icon is <span class="num">${PER}</span> fans at a typical home game.`;
+    key.innerHTML = `Each icon represents <span class="num">${PER}</span> fans, based on median recorded attendance across non-neutral home games.`;
     host.appendChild(key);
   }
 
